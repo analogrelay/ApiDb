@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using ApiDb.Model;
 
@@ -6,11 +6,8 @@ namespace ApiDb.Indexing
 {
     public class InMemoryIndexStorage : IndexStorage
     {
-        private List<ApiReference> _apiReferences = new List<ApiReference>();
-
-        public override Task SaveReferencesAsync(IReadOnlyList<ApiReference> references)
+        public override Task SaveAssemblyAsync(AssemblyIndex index, CancellationToken cancellationToken = default)
         {
-            _apiReferences.AddRange(references);
             return Task.CompletedTask;
         }
     }

@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
+using System.Text.Json.Serialization;
 using Mono.Cecil;
 
 namespace ApiDb.Model
@@ -6,7 +8,7 @@ namespace ApiDb.Model
     /// <summary>
     /// Represents the identity of a specific assembly at a specific version.
     /// </summary>
-    public class AssemblyIdentity
+    public class AssemblyIdentity : IEquatable<AssemblyIdentity>
     {
         /// <summary>
         /// Constructs a new <see cref="AssemblyIdentity"/>
@@ -49,6 +51,12 @@ namespace ApiDb.Model
                 asm.MainModule.Mvid.ToString("N"),
                 new AssemblyName(asm.FullName));
         }
+
+        public bool Equals(AssemblyIdentity other) => string.Equals(other.UniqueId, UniqueId);
+
+        public override bool Equals(object obj) => obj is AssemblyIdentity other && Equals(other);
+
+        public override int GetHashCode() => UniqueId.GetHashCode();
 
         public override string ToString() => $"{AssemblyName.Name}@{UniqueId}";
     }

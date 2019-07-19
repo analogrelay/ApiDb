@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using ApiDb.Indexing;
+using ApiDb.Model;
 using Microsoft.Extensions.Logging;
 using Mono.Cecil;
 
@@ -17,6 +18,7 @@ namespace ApiDb.Util.Commands
     {
         private readonly IConsole _console;
         private readonly ILoggerFactory _loggerFactory;
+        private readonly ILogger<IndexCommand> _logger;
 
         /// <summary>
         /// Creates a new instance of <see cref="IndexCommand"/>
@@ -27,40 +29,46 @@ namespace ApiDb.Util.Commands
         {
             _console = console;
             _loggerFactory = loggerFactory;
+            _logger = _loggerFactory.CreateLogger<IndexCommand>();
         }
 
         /// <summary>
         /// Indexes the specified assemblies.
         /// </summary>
         /// <param name="args">The assemblies to index.</param>
-        /// <param name="outputFile">The file to write the index to.</param>
+        /// <param name="outputDir">The directory to write the index to.</param>
         /// <param name="cancellationToken">Triggered when Ctrl-C is pressed.</param>
-        public async Task<int> ExecuteAsync(string outputFile, IEnumerable<string> args, CancellationToken cancellationToken)
+        public async Task<int> ExecuteAsync(string outputDir, IEnumerable<string> args, CancellationToken cancellationToken)
         {
-            using (var storage = CreateStorage(outputFile))
+            using (var storage = CreateStorage(outputDir))
             {
                 var indexWalker = new IndexWalker(_loggerFactory.CreateLogger<IndexWalker>());
                 foreach (var asmPath in args)
                 {
                     var asm = AssemblyDefinition.ReadAssembly(asmPath);
-                    indexWalker.AddAssembly(asm);
-                }
+                    var details = AssemblyDetails.ForAssembly(asm);
 
-                await storage.SaveReferencesAsync(indexWalker.IndexedApis);
+                    _logger.LogInformation("Indexing assembly: {Assembly}.", details.Identity);
+                    var index = indexWalker.IndexAssembly(asm, details);
+                    _logger.LogInformation("Saving index...");
+                    await storage.SaveAssemblyAsync(index, cancellationToken);
+                    _logger.LogInformation("Indexed assembly.");
+
+                }
             }
 
             return 0;
         }
 
-        private IndexStorage CreateStorage(string outputFile)
+        private IndexStorage CreateStorage(string outputDir)
         {
-            if(string.IsNullOrEmpty(outputFile))
+            if(string.IsNullOrEmpty(outputDir))
             {
                 return new InMemoryIndexStorage();
             }
             else
             {
-                return new FlatFileIndexStorage(new FileStream(outputFile, FileMode.Create, FileAccess.ReadWrite, FileShare.None));
+                return new JsonFilesIndexStorage(outputDir);
             }
         }
     }

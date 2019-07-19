@@ -15,7 +15,7 @@ namespace ApiDb.Util
                 .ConfigureLogging(logging =>
                 {
                     // TODO: Get from args.
-                    logging.AddFilter("ApiDb", LogLevel.Debug);
+                    logging.AddFilter("ApiDb", LogLevel.Information);
                 })
                 .RunToolAsync();
 

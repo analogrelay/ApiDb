@@ -27,7 +27,7 @@ namespace ApiDb.Indexing
         /// Walks the specified <see cref="AssemblyDefinition"/> and records new data in the index.
         /// </summary>
         /// <param name="assembly">The assembly to walk.</param>
-        public void AddAssembly(AssemblyDefinition assembly)
+        public AssemblyIndex IndexAssembly(AssemblyDefinition assembly, AssemblyDetails details)
         {
             _currentAssembly = AssemblyIdentity.ForAssembly(assembly);
             try
@@ -38,6 +38,12 @@ namespace ApiDb.Indexing
             {
                 _currentAssembly = null;
             }
+
+            var apis = _apis;
+            _apis = new List<ApiReference>();
+            _currentAssembly = null;
+
+            return new AssemblyIndex(details, apis);
         }
 
         protected override void WalkAssembly(AssemblyDefinition assembly)
