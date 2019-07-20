@@ -68,7 +68,7 @@ namespace ApiDb.Util.Commands
             }
             else
             {
-                return new JsonFilesIndexStorage(outputDir);
+                return new CsvIndexStorage(outputDir);
             }
         }
     }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using System.Text.Json.Serialization;
 using Mono.Cecil;
 
 namespace ApiDb.Model

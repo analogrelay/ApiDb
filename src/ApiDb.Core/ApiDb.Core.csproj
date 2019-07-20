@@ -9,7 +9,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
     <PackageReference Include="Mono.Cecil" Version="0.10.4" />
     <PackageReference Include="NuGet.Packaging.Core.Types" Version="4.2.0" />
-    <PackageReference Include="System.Text.Json" Version="4.6.0-preview6.19303.8" />
   </ItemGroup>
 
 </Project>

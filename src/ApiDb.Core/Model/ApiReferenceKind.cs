@@ -3,6 +3,7 @@
     public enum ApiReferenceKind
     {
         Reference,
-        Derive
+        Derive,
+        Implement,
     }
 }
