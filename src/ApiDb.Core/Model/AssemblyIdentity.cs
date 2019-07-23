@@ -16,8 +16,13 @@ namespace ApiDb.Model
         /// <param name="assemblyName">The <see cref="AssemblyName"/> for the assembly.</param>
         public AssemblyIdentity(string uniqueId, AssemblyName assemblyName)
         {
+            if (string.IsNullOrEmpty(uniqueId))
+            {
+                throw new ArgumentException("message", nameof(uniqueId));
+            }
+
             UniqueId = uniqueId;
-            AssemblyName = assemblyName;
+            AssemblyName = assemblyName ?? throw new ArgumentNullException(nameof(assemblyName));
         }
 
         /// <summary>

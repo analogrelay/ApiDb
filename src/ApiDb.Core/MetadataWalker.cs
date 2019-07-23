@@ -7,6 +7,11 @@ namespace ApiDb
     {
         protected virtual void WalkAssembly(AssemblyDefinition assembly)
         {
+            if (assembly is null)
+            {
+                throw new System.ArgumentNullException(nameof(assembly));
+            }
+
             VisitAssembly(assembly);
             WalkCustomAttributes(assembly);
 
@@ -18,6 +23,11 @@ namespace ApiDb
 
         protected virtual void WalkModule(ModuleDefinition module)
         {
+            if (module is null)
+            {
+                throw new System.ArgumentNullException(nameof(module));
+            }
+
             VisitModule(module);
             WalkCustomAttributes(module);
 
@@ -29,6 +39,11 @@ namespace ApiDb
 
         protected virtual void WalkType(TypeDefinition type)
         {
+            if (type is null)
+            {
+                throw new System.ArgumentNullException(nameof(type));
+            }
+
             VisitType(type);
             WalkCustomAttributes(type);
 
@@ -55,6 +70,11 @@ namespace ApiDb
 
         protected virtual void WalkEvent(EventDefinition evt)
         {
+            if (evt is null)
+            {
+                throw new System.ArgumentNullException(nameof(evt));
+            }
+
             WalkCustomAttributes(evt);
             VisitEvent(evt);
 
@@ -71,6 +91,11 @@ namespace ApiDb
 
         protected virtual void WalkMethod(MethodDefinition method)
         {
+            if (method is null)
+            {
+                throw new System.ArgumentNullException(nameof(method));
+            }
+
             WalkCustomAttributes(method);
             VisitMethod(method);
 
@@ -95,28 +120,33 @@ namespace ApiDb
 
         protected virtual void WalkParameter(ParameterDefinition param)
         {
+            if (param is null)
+            {
+                throw new System.ArgumentNullException(nameof(param));
+            }
+
             WalkCustomAttributes(param);
             VisitParameter(param);
         }
 
         protected virtual void WalkProperty(PropertyDefinition prop)
         {
+            if (prop is null)
+            {
+                throw new System.ArgumentNullException(nameof(prop));
+            }
+
             WalkCustomAttributes(prop);
             VisitProperty(prop);
-
-            if (prop.GetMethod != null)
-            {
-                WalkMethod(prop.GetMethod);
-            }
-
-            if (prop.SetMethod != null)
-            {
-                WalkMethod(prop.SetMethod);
-            }
         }
 
         protected virtual void WalkField(FieldDefinition field)
         {
+            if (field is null)
+            {
+                throw new System.ArgumentNullException(nameof(field));
+            }
+
             WalkCustomAttributes(field);
             VisitField(field);
         }
@@ -167,6 +197,11 @@ namespace ApiDb
 
         private void WalkCustomAttributes(ICustomAttributeProvider attributeProvider)
         {
+            if (attributeProvider is null)
+            {
+                throw new System.ArgumentNullException(nameof(attributeProvider));
+            }
+
             foreach (var attribute in attributeProvider.CustomAttributes)
             {
                 VisitCustomAttribute(attribute, attributeProvider);

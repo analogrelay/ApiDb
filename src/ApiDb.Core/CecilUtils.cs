@@ -15,7 +15,19 @@ namespace ApiDb
         /// <param name="localAttributeType">A local type to match the name against.</param>
         /// <returns>The matching attributes.</returns>
         internal static IEnumerable<CustomAttribute> GetByLocalType(this IEnumerable<CustomAttribute> attributes, Type localAttributeType)
-            => GetByName(attributes, localAttributeType.FullName);
+        {
+            if (attributes is null)
+            {
+                throw new ArgumentNullException(nameof(attributes));
+            }
+
+            if (localAttributeType is null)
+            {
+                throw new ArgumentNullException(nameof(localAttributeType));
+            }
+
+            return attributes.GetByName(localAttributeType.FullName);
+        }
 
         /// <summary>
         /// Gets all attributes that match the specified full name. Assembly name is not compared.
@@ -25,6 +37,16 @@ namespace ApiDb
         /// <returns>The matching attributes.</returns>
         internal static IEnumerable<CustomAttribute> GetByName(this IEnumerable<CustomAttribute> attributes, string fullName)
         {
+            if (attributes is null)
+            {
+                throw new ArgumentNullException(nameof(attributes));
+            }
+
+            if (string.IsNullOrEmpty(fullName))
+            {
+                throw new ArgumentException("message", nameof(fullName));
+            }
+
             foreach (var attribute in attributes)
             {
                 var type = attribute.AttributeType;
@@ -43,6 +65,11 @@ namespace ApiDb
         /// <returns>The value.</returns>
         internal static T GetConstructorValues<T>(this CustomAttribute attribute)
         {
+            if (attribute is null)
+            {
+                throw new ArgumentNullException(nameof(attribute));
+            }
+
             return (T)attribute.ConstructorArguments[0].Value;
         }
 
@@ -55,6 +82,11 @@ namespace ApiDb
         /// <returns>The values.</returns>
         internal static (T1, T2) GetConstructorValues<T1, T2>(this CustomAttribute attribute)
         {
+            if (attribute is null)
+            {
+                throw new ArgumentNullException(nameof(attribute));
+            }
+
             return ((T1)attribute.ConstructorArguments[0].Value,
                 (T2)attribute.ConstructorArguments[1].Value);
         }

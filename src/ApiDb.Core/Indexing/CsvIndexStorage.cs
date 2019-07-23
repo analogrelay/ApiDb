@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,11 +14,21 @@ namespace ApiDb.Indexing
 
         public CsvIndexStorage(string rootDirectory)
         {
+            if (string.IsNullOrEmpty(rootDirectory))
+            {
+                throw new ArgumentException("message", nameof(rootDirectory));
+            }
+
             _rootDirectory = rootDirectory;
         }
 
         public override async Task SaveAssemblyAsync(AssemblyIndex index, CancellationToken cancellationToken = default)
         {
+            if (index is null)
+            {
+                throw new ArgumentNullException(nameof(index));
+            }
+
             var asmDir = Path.Combine(_rootDirectory, index.Details.Identity.UniqueId.Substring(0, 2), index.Details.Identity.UniqueId);
             if (!Directory.Exists(asmDir))
             {
@@ -25,10 +37,25 @@ namespace ApiDb.Indexing
 
             await Task.WhenAll(
                 SaveDetailsAsync(Path.Combine(asmDir, $"{index.Details.Identity.AssemblyName.Name}.txt"), index.Details, cancellationToken),
-                SaveApisAsync(Path.Combine(asmDir, "apis.csv"), index.ApiReferences, cancellationToken));
+                SaveReferencesAsync(Path.Combine(asmDir, "references.csv"), index.ApiReferences, cancellationToken),
+                SaveDeclarationsAsync(Path.Combine(asmDir, "declarations.csv"), index.ApiDeclarations, cancellationToken));
         }
 
-        private async Task SaveApisAsync(string fileName, IEnumerable<ApiReference> apiReferences, CancellationToken cancellationToken)
+        private async Task SaveDeclarationsAsync(string fileName, IReadOnlyList<ApiDeclaration> apiDeclarations, CancellationToken cancellationToken)
+        {
+            using (var writer = new StreamWriter(fileName))
+            {
+                await writer.WriteLineAsync("Kind,Api");
+                foreach(var declaration in apiDeclarations)
+                {
+                    await writer.WriteFieldsAsync(
+                        declaration.Kind.ToString(),
+                        declaration.Path.ToString());
+                }
+            }
+        }
+
+        private async Task SaveReferencesAsync(string fileName, IEnumerable<ApiReference> apiReferences, CancellationToken cancellationToken)
         {
             using (var writer = new StreamWriter(fileName))
             {

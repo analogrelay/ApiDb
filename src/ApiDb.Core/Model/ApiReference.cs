@@ -11,14 +11,14 @@ namespace ApiDb.Model
         /// Constructs a new <see cref="ApiReference"/>
         /// </summary>
         /// <param name="assembly">The assembly containing the reference.</param>
-        /// <param name="source">A <see cref="MetadataReference"/> referring to the metadata item containing the reference.</param>
-        /// <param name="target">A <see cref="MetadataReference"/> representing the target item.</param>
+        /// <param name="source">A <see cref="MetadataPath"/> referring to the metadata item containing the reference.</param>
+        /// <param name="target">A <see cref="MetadataPath"/> representing the target item.</param>
         /// <param name="kind">A <see cref="ApiReferenceKind"/> representing the kind of the API reference.</param>
-        public ApiReference(AssemblyIdentity assembly, MetadataReference source, MetadataReference target, ApiReferenceKind kind)
+        public ApiReference(AssemblyIdentity assembly, MetadataPath source, MetadataPath target, ApiReferenceKind kind)
         {
-            Assembly = assembly;
-            Source = source;
-            Target = target;
+            Assembly = assembly ?? throw new System.ArgumentNullException(nameof(assembly));
+            Source = source ?? throw new System.ArgumentNullException(nameof(source));
+            Target = target ?? throw new System.ArgumentNullException(nameof(target));
             Kind = kind;
         }
 
@@ -28,41 +28,18 @@ namespace ApiDb.Model
         public AssemblyIdentity Assembly { get; }
 
         /// <summary>
-        /// Gets a <see cref="MetadataReference"/> referring to the metadata item containing the reference.
+        /// Gets a <see cref="MetadataPath"/> referring to the metadata item containing the reference.
         /// </summary>
-        public MetadataReference Source { get; }
+        public MetadataPath Source { get; }
 
         /// <summary>
-        /// Gets a <see cref="MetadataReference"/> representing the target item.
+        /// Gets a <see cref="MetadataPath"/> representing the target item.
         /// </summary>
-        public MetadataReference Target { get; }
+        public MetadataPath Target { get; }
 
         /// <summary>
         /// Gets the <see cref="ApiReferenceKind"/> defining the kind of the API reference.
         /// </summary>
         public ApiReferenceKind Kind { get; }
-
-        public override string ToString()
-        {
-            var builder = new StringBuilder();
-            builder.Append($"[{Kind}]");
-            builder.Append(Assembly.ToString());
-            if(!string.IsNullOrEmpty(Source.TypeName))
-            {
-                builder.Append($"!{Source.TypeName}");
-                if(!string.IsNullOrEmpty(Source.MemberName))
-                {
-                    builder.Append($"#{Source.MemberName}");
-                    if(!string.IsNullOrEmpty(Source.ParameterName))
-                    {
-                        builder.Append($"/{Source.ParameterName}");
-                    }
-                }
-            }
-
-            builder.Append(" ==> ");
-            builder.Append(Target.ToString());
-            return builder.ToString();
-        }
     }
 }

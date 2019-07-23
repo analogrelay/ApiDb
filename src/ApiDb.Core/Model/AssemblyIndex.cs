@@ -11,11 +11,13 @@ namespace ApiDb.Model
         /// Constructs an <see cref="AssemblyIndex"/>.
         /// </summary>
         /// <param name="details">The <see cref="AssemblyDetails"/> describing the detailed identity of the assembly.</param>
-        /// <param name="apiReferences">A list of <see cref="ApiReference"/> describing the APIs this assembly references.</param>
-        public AssemblyIndex(AssemblyDetails details, IReadOnlyList<ApiReference> apiReferences)
+        /// <param name="apiReferences">A list of <see cref="ApiReference"/> objects describing the APIs this assembly references.</param>
+        /// <param name="types">A list of <see cref="ApiDeclaration"/> objects describing the types declared in this assembly (and their members).</param>
+        public AssemblyIndex(AssemblyDetails details, IReadOnlyList<ApiReference> apiReferences, IReadOnlyList<ApiDeclaration> apiDeclarations)
         {
-            Details = details;
-            ApiReferences = apiReferences;
+            Details = details ?? throw new System.ArgumentNullException(nameof(details));
+            ApiReferences = apiReferences ?? throw new System.ArgumentNullException(nameof(apiReferences));
+            ApiDeclarations = apiDeclarations ?? throw new System.ArgumentNullException(nameof(apiDeclarations));
         }
 
         /// <summary>
@@ -24,8 +26,13 @@ namespace ApiDb.Model
         public AssemblyDetails Details { get; }
 
         /// <summary>
-        /// Gets a list of <see cref="ApiReference"/> describing the APIs this assembly references.
+        /// Gets a list of <see cref="ApiReference"/> objects describing the APIs this assembly references.
         /// </summary>
         public IReadOnlyList<ApiReference> ApiReferences { get; }
+
+        /// <summary>
+        /// Gets a list of <see cref="ApiDeclaration"/> objects describing the types declared in this assembly (and their members).
+        /// </summary>
+        public IReadOnlyList<ApiDeclaration> ApiDeclarations { get; }
     }
 }

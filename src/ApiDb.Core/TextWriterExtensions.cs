@@ -7,6 +7,16 @@ namespace ApiDb
     {
         public static async Task WriteFieldsAsync(this TextWriter writer, params string[] fields)
         {
+            if (writer is null)
+            {
+                throw new System.ArgumentNullException(nameof(writer));
+            }
+
+            if (fields is null)
+            {
+                throw new System.ArgumentNullException(nameof(fields));
+            }
+
             for (var i = 0; i < fields.Length; i++)
             {
                 if (i != 0)

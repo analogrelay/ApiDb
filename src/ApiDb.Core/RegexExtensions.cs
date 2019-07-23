@@ -3,23 +3,21 @@
 namespace ApiDb
 {
     public static class RegexExtensions
-{
-    public static bool TryMatch(this Regex regex, string input, out Match match)
     {
-        match = regex.Match(input);
-        return match.Success;
-    }
+        public static bool IsMatch(this Regex regex, string input, out Match match)
+        {
+            if (regex is null)
+            {
+                throw new System.ArgumentNullException(nameof(regex));
+            }
 
-    public static bool TryMatch(this Regex regex, string input, int startat, out Match match)
-    {
-        match = regex.Match(input, startat);
-        return match.Success;
-    }
+            if (string.IsNullOrEmpty(input))
+            {
+                throw new System.ArgumentException("message", nameof(input));
+            }
 
-    public static bool TryMatch(this Regex regex, string input, int beginning, int length, out Match match)
-    {
-        match = regex.Match(input, beginning, length);
-        return match.Success;
+            match = regex.Match(input);
+            return match.Success;
+        }
     }
-}
 }

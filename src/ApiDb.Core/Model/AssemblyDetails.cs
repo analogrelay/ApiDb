@@ -17,7 +17,7 @@ namespace ApiDb.Model
         /// <param name="build">The build identity of the assembly, if known.</param>
         public AssemblyDetails(AssemblyIdentity identity, string? informationalVersion = null, BuildIdentity? build = null)
         {
-            Identity = identity;
+            Identity = identity ?? throw new System.ArgumentNullException(nameof(identity));
             InformationalVersion = informationalVersion;
             Build = build;
         }
