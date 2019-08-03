@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using ApiDb.Model;
 
-namespace ApiDb.Indexing
+namespace ApiDb.Storage
 {
-    public abstract class IndexStorage: IDisposable
+    public abstract class CatalogStorage: IDisposable
     {
         public virtual void Dispose()
         {

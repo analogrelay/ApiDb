@@ -14,6 +14,8 @@ namespace Contrib.Extensions.Hosting.Tool
         {
             // We assume that a tool doesn't want App Configuration. That may be wrong. The user is always welcome to call '.ConfigureAppConfiguration'
 
+            var diag = false;
+
             // We could consider putting this in release builds as well, but System.CommandLine already supports it in the default case.
 #if DEBUG
             // Handle the debug directive (System.CommandLine handles it too, but we want to support it even earlier)
@@ -24,6 +26,13 @@ namespace Contrib.Extensions.Hosting.Tool
                 Console.ReadLine();
 
                 args = args.Where(a => !string.Equals(a, "[debug]", StringComparison.OrdinalIgnoreCase)).ToArray();
+            }
+
+            // Handle the diag directive
+            if(args.Any(a => string.Equals(a, "[diag]", StringComparison.OrdinalIgnoreCase)))
+            {
+                diag = true;
+                args = args.Where(a => !string.Equals(a, "[diag]", StringComparison.OrdinalIgnoreCase)).ToArray();
             }
 #endif
 
@@ -41,7 +50,8 @@ namespace Contrib.Extensions.Hosting.Tool
                 .ConfigureLogging((hostingContext, logging) =>
                 {
                     // Add default filter for our loggers to error or above
-                    logging.AddFilter("Contrib", LogLevel.Error);
+                    logging.AddFilter("Contrib", diag ? LogLevel.Debug : LogLevel.Error);
+                    logging.SetMinimumLevel(diag ? LogLevel.Debug : LogLevel.Error);
 
                     // Add config for completion, but we don't really provide a way to load app config...
                     logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
@@ -71,6 +81,7 @@ namespace Contrib.Extensions.Hosting.Tool
             services.AddSingleton<IEntryPoint, DefaultEntryPoint>();
             services.AddSingleton<ICommandDiscoverer, DefaultCommandDiscoverer>();
             services.AddSingleton<IConsole, SystemConsole>();
+            services.AddSingleton<IHostLifetime, ToolLifetime>();
         }
     }
 }

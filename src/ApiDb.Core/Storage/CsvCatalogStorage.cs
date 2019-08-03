@@ -6,13 +6,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using ApiDb.Model;
 
-namespace ApiDb.Indexing
+namespace ApiDb.Storage
 {
-    public class CsvIndexStorage : IndexStorage
+    public class CsvCatalogStorage : CatalogStorage
     {
         private readonly string _rootDirectory;
 
-        public CsvIndexStorage(string rootDirectory)
+        public CsvCatalogStorage(string rootDirectory)
         {
             if (string.IsNullOrEmpty(rootDirectory))
             {
@@ -36,19 +36,21 @@ namespace ApiDb.Indexing
             }
 
             await Task.WhenAll(
-                SaveDetailsAsync(Path.Combine(asmDir, $"{index.Details.Identity.AssemblyName.Name}.txt"), index.Details, cancellationToken),
+                SaveDetailsAsync(Path.Combine(asmDir, $"{index.Details.Identity.AssemblyName.Name}.txt"), index.Version, index.Details, cancellationToken),
                 SaveReferencesAsync(Path.Combine(asmDir, "references.csv"), index.ApiReferences, cancellationToken),
-                SaveDeclarationsAsync(Path.Combine(asmDir, "declarations.csv"), index.ApiDeclarations, cancellationToken));
+                SaveDeclarationsAsync(Path.Combine(asmDir, "declarations.csv"), index.Details.Identity, index.ApiDeclarations, cancellationToken));
         }
 
-        private async Task SaveDeclarationsAsync(string fileName, IReadOnlyList<ApiDeclaration> apiDeclarations, CancellationToken cancellationToken)
+        private async Task SaveDeclarationsAsync(string fileName, AssemblyIdentity identity, IReadOnlyList<ApiDeclaration> apiDeclarations, CancellationToken cancellationToken)
         {
             using (var writer = new StreamWriter(fileName))
             {
-                await writer.WriteLineAsync("Kind,Api");
+                await writer.WriteLineAsync("AssemblyName,AssemblyId,Kind,Api");
                 foreach(var declaration in apiDeclarations)
                 {
                     await writer.WriteFieldsAsync(
+                        identity.AssemblyName.FullName,
+                        identity.ToString(),
                         declaration.Kind.ToString(),
                         declaration.Path.ToString());
                 }
@@ -72,10 +74,11 @@ namespace ApiDb.Indexing
             }
         }
 
-        private async Task SaveDetailsAsync(string fileName, AssemblyDetails details, CancellationToken cancellationToken)
+        private async Task SaveDetailsAsync(string fileName, ModelVersion version, AssemblyDetails details, CancellationToken cancellationToken)
         {
             using (var writer = new StreamWriter(fileName))
             {
+                await writer.WriteLineAsync($"ModelVersion: {version}");
                 await writer.WriteLineAsync($"AssemblyId: {details.Identity}");
                 await writer.WriteLineAsync($"FullName: {details.Identity.AssemblyName.FullName}");
                 await writer.WriteLineAsync($"InformationalVersion: {details.InformationalVersion}");

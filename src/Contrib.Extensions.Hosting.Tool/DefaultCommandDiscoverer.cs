@@ -4,6 +4,7 @@ using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.DragonFruit;
 using System.CommandLine.Invocation;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -56,7 +57,7 @@ namespace Contrib.Extensions.Hosting.Tool
             var subcommands = CollectSubcommands(programType, services, rootBuilder).ToList();
             foreach (var command in subcommands)
             {
-                _logger.LogInformation("Adding sub-command: {SubcommandName}.", command.Name);
+                _logger.LogInformation("Adding sub-command: {SubCommandName} to {RootCommandName}.", command.Name, builder.Command.Name);
                 builder.AddCommand(command);
             }
 
@@ -86,7 +87,31 @@ namespace Contrib.Extensions.Hosting.Tool
                 });
             }
 
+            ConfigureFromAttribute<DescriptionAttribute>(
+                programType,
+                builder.Command,
+                (cmd, attr) => cmd.Description = attr.Description);
+
+            ConfigureFromAttribute<DisplayNameAttribute>(
+                programType,
+                builder.Command,
+                (cmd, attr) => cmd.Name = attr.DisplayName);
+
             return builder;
+        }
+
+        private void ConfigureFromAttribute<TAttr>(MemberInfo member, Command command, Action<Command, TAttr> configurer)
+            where TAttr : Attribute
+        {
+            var attr = member.GetCustomAttribute<TAttr>(inherit: true);
+            if (attr == null)
+            {
+                return;
+            }
+            else
+            {
+                configurer(command, attr);
+            }
         }
 
         private string GetName(Assembly entryPoint)

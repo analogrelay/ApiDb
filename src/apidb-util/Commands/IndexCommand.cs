@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.CommandLine;
-using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ApiDb.Indexing;
 using ApiDb.Model;
+using ApiDb.Storage;
 using Microsoft.Extensions.Logging;
 using Mono.Cecil;
 
 namespace ApiDb.Util.Commands
 {
     /// <summary>
-    /// A command to generate ApiDb indexes.
+    /// A command to index assemblies
     /// </summary>
     public class IndexCommand
     {
@@ -36,14 +35,27 @@ namespace ApiDb.Util.Commands
         /// Indexes the specified assemblies.
         /// </summary>
         /// <param name="args">The assemblies to index.</param>
-        /// <param name="outputDir">The directory to write the index to.</param>
+        /// <param name="catalog">The directory containing the API Catalog.</param>
         /// <param name="cancellationToken">Triggered when Ctrl-C is pressed.</param>
-        public async Task<int> ExecuteAsync(string outputDir, IEnumerable<string> args, CancellationToken cancellationToken)
+        public async Task<int> ExecuteAsync(string catalog, IEnumerable<string> args, CancellationToken cancellationToken)
         {
-            using (var storage = CreateStorage(outputDir))
+            var assemblies = args?.ToList();
+            if(assemblies == null || assemblies.Count == 0)
+            {
+                _logger.LogError("At least one assembly path must be specified!");
+                return 1;
+            }
+
+            if(string.IsNullOrEmpty(catalog))
+            {
+                _logger.LogError("Missing required option '--catalog'.");
+                return 1;
+            }
+
+            using (var storage = new CsvCatalogStorage(catalog))
             {
                 var indexWalker = new IndexWalker(_loggerFactory.CreateLogger<IndexWalker>());
-                foreach (var asmPath in args)
+                foreach (var asmPath in assemblies)
                 {
                     var asm = AssemblyDefinition.ReadAssembly(asmPath);
                     var details = AssemblyDetails.ForAssembly(asm);
@@ -58,18 +70,6 @@ namespace ApiDb.Util.Commands
             }
 
             return 0;
-        }
-
-        private IndexStorage CreateStorage(string outputDir)
-        {
-            if(string.IsNullOrEmpty(outputDir))
-            {
-                return new InMemoryIndexStorage();
-            }
-            else
-            {
-                return new CsvIndexStorage(outputDir);
-            }
         }
     }
 }

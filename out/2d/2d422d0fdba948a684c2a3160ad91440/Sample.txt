@@ -1,3 +1,0 @@
-AssemblyId: Sample@2d422d0fdba948a684c2a3160ad91440
-FullName: Sample, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-InformationalVersion: 1.0.0

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace ApiDb.Indexing
+namespace ApiDb
 {
     public class IndexWalker : MetadataWalker
     {
@@ -54,7 +54,7 @@ namespace ApiDb.Indexing
                 _currentAssembly = null;
             }
 
-            var index = new AssemblyIndex(details, _refs, _decls);
+            var index = new AssemblyIndex(ModelVersion.Current, details, _refs, _decls);
 
             _currentAssembly = null;
             _refs = null;

@@ -47,6 +47,10 @@ namespace Contrib.Extensions.Hosting.Tool
             builder.UseSuggestDirective();
             builder.UseExceptionHandler((ex, context) =>
             {
+                if(ex is OperationCanceledException)
+                {
+                    return;
+                }
                 context.InvocationResult = new ErrorResult(ex, _logger);
             });
             builder.UseDebugDirective();
